@@ -37,4 +37,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['**/*.e2e-spec.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
 )
