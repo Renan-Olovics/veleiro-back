@@ -1,12 +1,11 @@
-import { Test, type TestingModule } from '@nestjs/testing'
 import { JwtService } from '@nestjs/jwt'
 import { faker } from '@faker-js/faker'
 import * as bcrypt from 'bcryptjs'
-import { mockDeep } from 'jest-mock-extended'
 
 import { PrismaService } from '@/services/prisma.service'
 
 import { AuthService } from './auth.service'
+import { createModule } from '@/config/test/module'
 
 describe('AuthService', () => {
   let service: AuthService
@@ -14,16 +13,7 @@ describe('AuthService', () => {
   let jwt: JwtService
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        JwtService,
-        {
-          provide: PrismaService,
-          useValue: mockDeep<PrismaService>() as PrismaService,
-        },
-      ],
-    }).compile()
+    const module = await createModule({ providers: [AuthService, JwtService] })
 
     service = module.get<AuthService>(AuthService)
     prisma = module.get<PrismaService>(PrismaService)
