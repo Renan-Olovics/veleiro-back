@@ -1,10 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { compare } from 'bcryptjs'
+
 import { UserRepository } from '@/repositories/user.repository'
 
-import { compare } from 'bcryptjs'
-import { JwtService } from '@nestjs/jwt'
-import type { AuthLoginData } from './types/login-data.type'
-import type { AuthLoginResponse } from './types/login-response.type'
+import type { AuthLoginData, AuthLoginResponse } from './types'
 
 @Injectable()
 export class AuthService {

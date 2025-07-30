@@ -10,6 +10,10 @@ export class UserRepository {
     return this.prisma.user.findUnique({ where: { email } })
   }
 
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } })
+  }
+
   async create(
     data: Omit<User, 'id' | 'createdAt' | 'updatedAt'> & { password: string },
   ): Promise<User> {
