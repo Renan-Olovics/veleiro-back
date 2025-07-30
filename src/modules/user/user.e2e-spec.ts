@@ -1,21 +1,18 @@
 import type { INestApplication } from '@nestjs/common'
-import type { TestingModule } from '@nestjs/testing'
 import { ValidationPipe } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
-import { Test } from '@nestjs/testing'
 import * as request from 'supertest'
 
 import { AppModule } from '@/app.module'
+import { createModule } from '@/config/test/module'
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
+    const module = await createModule({ imports: [AppModule] })
 
-    app = moduleFixture.createNestApplication()
+    app = module.createNestApplication()
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
   })
