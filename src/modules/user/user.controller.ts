@@ -1,5 +1,11 @@
 import { Controller, Post, Body, Query, Get } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger'
 
 import { RegisterUserDto } from './dto/register-user.dto'
 import { UserService } from './user.service'
@@ -36,7 +42,18 @@ export class UserController {
     summary: 'Check if email is in use',
     description: 'Returns true if email is already registered.',
   })
+  @ApiQuery({
+    name: 'email',
+    type: String,
+    required: true,
+    description: 'Email to check if it is already in use',
+    example: 'john@example.com',
+  })
   @ApiResponse({ status: 200, description: 'Email check result.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Email parameter is required and must be valid.',
+  })
   async checkEmail(@Query('email') email: string) {
     return { inUse: await this.userService.isEmailInUse(email) }
   }
