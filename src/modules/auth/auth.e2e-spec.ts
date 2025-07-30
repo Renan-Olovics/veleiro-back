@@ -39,7 +39,7 @@ describe('AuthModule (e2e)', () => {
     const name = faker.person.fullName()
 
     await request(app.getHttpServer())
-      .post('/user/register')
+      .post('/user/create')
       .send({ name, email, password })
       .expect(201)
 

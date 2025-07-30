@@ -1,31 +1,33 @@
+import { mock, type MockProxy } from 'jest-mock-extended'
 import { JwtService } from '@nestjs/jwt'
 import { faker } from '@faker-js/faker'
 import * as bcrypt from 'bcryptjs'
 
-import { PrismaService } from '@/services/prisma.service'
+import { UserRepository } from '@/repositories/user.repository'
+import { createModule } from '@/config/test/module'
 
 import { AuthService } from './auth.service'
-import { createModule } from '@/config/test/module'
 
 describe('AuthService', () => {
   let service: AuthService
-  let prisma: PrismaService
   let jwt: JwtService
+  let userRepository: MockProxy<UserRepository>
 
   beforeEach(async () => {
-    const module = await createModule({ providers: [AuthService, JwtService] })
-
+    userRepository = mock<UserRepository>()
+    const module = await createModule({
+      providers: [
+        AuthService,
+        JwtService,
+        { provide: UserRepository, useValue: userRepository },
+      ],
+    })
     service = module.get<AuthService>(AuthService)
-    prisma = module.get<PrismaService>(PrismaService)
     jwt = module.get<JwtService>(JwtService)
   })
 
-  it('should be defined', () => {
-    expect(service).toBeDefined()
-  })
-
   it('should throw if user not found', async () => {
-    jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null)
+    userRepository.findByEmail.mockResolvedValue(null)
     await expect(
       service.login({
         email: faker.internet.email(),
@@ -37,7 +39,7 @@ describe('AuthService', () => {
   it('should throw if password is invalid', async () => {
     const email = faker.internet.email()
     const password = faker.internet.password()
-    jest.spyOn(prisma.user, 'findUnique').mockResolvedValue({
+    userRepository.findByEmail.mockResolvedValue({
       id: faker.string.uuid(),
       name: faker.person.fullName(),
       email,
@@ -52,7 +54,7 @@ describe('AuthService', () => {
   it('should return access_token if login is valid', async () => {
     const email = faker.internet.email()
     const password = faker.internet.password()
-    jest.spyOn(prisma.user, 'findUnique').mockResolvedValue({
+    userRepository.findByEmail.mockResolvedValue({
       id: faker.string.uuid(),
       name: faker.person.fullName(),
       email,

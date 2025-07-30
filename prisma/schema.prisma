@@ -15,5 +15,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([email], name: "idx_users_email")
   @@map("users")
 }

@@ -4,13 +4,15 @@ import { mockDeep } from 'jest-mock-extended'
 
 import { PrismaService } from '@/services/prisma.service'
 
+type createModule = {
+  providers?: Provider[]
+  imports?: Exclude<ModuleMetadata['imports'], undefined>
+}
+
 export const createModule = async ({
   providers = [],
   imports = [],
-}: {
-  providers?: Provider[]
-  imports?: Exclude<ModuleMetadata['imports'], undefined>
-} = {}): Promise<TestingModule> => {
+}: createModule): Promise<TestingModule> => {
   const module = await Test.createTestingModule({
     imports: [...imports],
     providers: [
