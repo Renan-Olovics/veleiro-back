@@ -1,14 +1,37 @@
 import { Controller, Post, Body } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger'
 
-import { AuthLoginData } from './types/login-data.type'
+import { AuthLoginDto } from './dto/auth-login.dto'
 import { AuthService } from './auth.service'
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() { email, password }: AuthLoginData) {
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticate user and return JWT token.',
+  })
+  @ApiBody({
+    description: 'Login credentials',
+    type: AuthLoginDto,
+    required: true,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Login successful, returns JWT token.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials.',
+  })
+  async login(@Body() { email, password }: AuthLoginDto) {
     return await this.authService.login({ email, password })
   }
 }
