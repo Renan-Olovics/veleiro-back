@@ -2,8 +2,8 @@ import { BadRequestException } from '@nestjs/common'
 import { mockDeep } from 'jest-mock-extended'
 import { faker } from '@faker-js/faker'
 
-import { UserRepository } from '@/repositories/user.repository'
 import { createModule } from '@/config/test/module'
+import { UserRepository } from '@/repositories'
 
 import { UserService } from './user.service'
 
@@ -27,10 +27,7 @@ describe('UserService', () => {
   beforeEach(async () => {
     userRepository = mockDeep<UserRepository>()
     const module = await createModule({
-      providers: [
-        UserService,
-        { provide: UserRepository, useValue: userRepository },
-      ],
+      providers: [UserService, { provide: UserRepository, useValue: userRepository }],
     })
     service = module.get<UserService>(UserService)
     email = faker.internet.email()
@@ -40,9 +37,7 @@ describe('UserService', () => {
 
   it('should throw if email is already in use', async () => {
     userRepository.findByEmail.mockResolvedValue(makeUser())
-    await expect(service.create({ name, email, password })).rejects.toThrow(
-      BadRequestException,
-    )
+    await expect(service.create({ name, email, password })).rejects.toThrow(BadRequestException)
   })
 
   it('should create user if email is not in use', async () => {

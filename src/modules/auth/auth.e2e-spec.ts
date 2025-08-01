@@ -3,9 +3,9 @@ import { ValidationPipe } from '@nestjs/common'
 import * as request from 'supertest'
 import { hash } from 'bcryptjs'
 
-import { PrismaService } from '@/services/prisma.service'
-import { AppModule } from '@/app.module'
 import { createModule } from '@/config/test/module'
+import { PrismaService } from '@/services'
+import { AppModule } from '@/app.module'
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication

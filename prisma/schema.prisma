@@ -15,6 +15,62 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relationships
+  folders Folder[]
+  files   File[]
+
   @@index([email], name: "idx_users_email")
   @@map("users")
+}
+
+model Folder {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String? // For visual customization
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Hierarchical structure - folder can have a parent folder
+  parentId String?
+  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderHierarchy")
+
+  // Folder can contain files
+  files File[]
+
+  @@index([userId], name: "idx_folders_user")
+  @@index([parentId], name: "idx_folders_parent")
+  @@map("folders")
+}
+
+model File {
+  id           String   @id @default(uuid())
+  name         String
+  originalName String // Original file name
+  description  String?
+  mimeType     String // MIME type of the file
+  size         Int // File size in bytes
+  s3Url        String // S3 file URL
+  s3Key        String // S3 file key (bucket/key)
+  extension    String? // File extension
+  pulseData    Json? // Pulse API data in JSON format
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // File can be in a folder
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([userId], name: "idx_files_user")
+  @@index([folderId], name: "idx_files_folder")
+  @@map("files")
 }

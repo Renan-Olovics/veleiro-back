@@ -3,8 +3,8 @@ import { ValidationPipe } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
 import * as request from 'supertest'
 
-import { AppModule } from '@/app.module'
 import { createModule } from '@/config/test/module'
+import { AppModule } from '@/app.module'
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication

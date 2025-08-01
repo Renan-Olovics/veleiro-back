@@ -32,11 +32,62 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
       semi: ['error', 'never'],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports' },
       ],
+      // Import organization rules
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin', // Node.js built-in modules
+            'external', // Third-party modules (npm packages)
+            'internal', // Internal modules (absolute paths with @/)
+            'parent', // Parent directory imports (../)
+            'sibling', // Sibling directory imports (./)
+            'index', // Index imports
+            'object', // Object imports
+            'type', // Type imports
+          ],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+          pathGroups: [
+            {
+              pattern: '@nestjs/**',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'after',
+            },
+            {
+              pattern: '../**',
+              group: 'parent',
+              position: 'after',
+            },
+            {
+              pattern: './**',
+              group: 'sibling',
+              position: 'after',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
+        },
+      ],
+      'import/no-duplicates': 'error',
+      'import/no-unresolved': 'off',
+      'import/prefer-default-export': 'off',
+      'import/no-default-export': 'warn',
     },
   },
   {

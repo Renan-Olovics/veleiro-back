@@ -1,0 +1,105 @@
+{
+  "bounding_boxes": {
+    "Images": [
+      {
+        "bounding_box": [
+          0.9784,
+          0.729,
+          2.7036,
+          0.7288,
+          2.7038,
+          1.7481,
+          0.9786,
+          1.7482
+        ],
+        "confidence": "N/A",
+        "page_number": 1
+      }
+    ],
+    "Tables": [],
+    "Text": [
+      {
+        "average_word_confidence": 0.9866666666666667,
+        "bounding_box": [
+          1.008,
+          0.8249,
+          2.695,
+          0.8423,
+          2.6857,
+          1.7404,
+          0.9988,
+          1.723
+        ],
+        "content": "Yukon Education \u00c9ducation",
+        "page_number": 1
+      },
+      {
+        "average_word_confidence": 0.9943333333333332,
+        "bounding_box": [
+          0.9924,
+          1.9912,
+          2.0223,
+          1.9936,
+          2.0219,
+          2.1573,
+          0.9921,
+          2.1549
+        ],
+        "content": "PDF Test File",
+        "page_number": 1
+      },
+      {
+        "average_word_confidence": 0.994842105263158,
+        "bounding_box": [
+          0.9885,
+          2.3744,
+          7.3573,
+          2.3693,
+          7.3578,
+          2.954,
+          0.989,
+          2.9591
+        ],
+        "content": "Congratulations, your computer is equipped with a PDF (Portable Document Format) reader! You should be able to view any of the PDF documents and forms available on our site. PDF forms are indicated by these icons: or .",
+        "page_number": 1
+      },
+      {
+        "average_word_confidence": 0.9958181818181818,
+        "bounding_box": [
+          0.9908,
+          3.1518,
+          3.3658,
+          3.154,
+          3.3649,
+          4.0826,
+          0.9899,
+          4.0804
+        ],
+        "content": "Yukon Department of Education Box 2703 Whitehorse, Yukon Canada Y1A 2C6",
+        "page_number": 1
+      },
+      {
+        "average_word_confidence": 0.9846666666666667,
+        "bounding_box": [
+          0.9888,
+          4.2953,
+          5.425,
+          4.2981,
+          5.4248,
+          4.4835,
+          0.9887,
+          4.4807
+        ],
+        "content": "Please visit our website at: http://www.education.gov.yk.ca/",
+        "page_number": 1
+      }
+    ]
+  },
+  "is_url": false,
+  "markdown": "<figure>\n\nYukon\nEducation\n\u00c9ducation\n\n</figure>\n\n\nPDF Test File\n\nCongratulations, your computer is equipped with a PDF (Portable Document Format)\nreader! You should be able to view any of the PDF documents and forms available on\nour site. PDF forms are indicated by these icons:\nor\n.\n\nYukon Department of Education\nBox 2703\nWhitehorse, Yukon\nCanada\nY1A 2C6\n\nPlease visit our website at: http://www.education.gov.yk.ca/\n",
+  "plan-info": {
+    "note": "Extracted using markdown-based document intelligence",
+    "pages_used": 1,
+    "tier": null
+  }
+}

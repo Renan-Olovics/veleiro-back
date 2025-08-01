@@ -1,10 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common'
+import { User } from '@prisma/client'
 import { hash } from 'bcryptjs'
 
-import { UserRepository } from '@/repositories/user.repository'
+import { UserRepository } from '@/repositories'
 
-import { RegisterUserData } from './types/register-user-data.type'
-import { User } from '@prisma/client'
+import { RegisterUserData } from './types'
 
 @Injectable()
 export class UserService {
@@ -19,8 +19,10 @@ export class UserService {
 
     const hashedPassword = await hash(data.password, 10)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { createdAt, updatedAt, password, ...user } =
-      await this.userRepository.create({ ...data, password: hashedPassword })
+    const { createdAt, updatedAt, password, ...user } = await this.userRepository.create({
+      ...data,
+      password: hashedPassword,
+    })
     return user
   }
 

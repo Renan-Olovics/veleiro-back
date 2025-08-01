@@ -3,8 +3,8 @@ import { JwtService } from '@nestjs/jwt'
 import { faker } from '@faker-js/faker'
 import * as bcrypt from 'bcryptjs'
 
-import { UserRepository } from '@/repositories/user.repository'
 import { createModule } from '@/config/test/module'
+import { UserRepository } from '@/repositories'
 
 import { AuthService } from './auth.service'
 
@@ -16,11 +16,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     userRepository = mock<UserRepository>()
     const module = await createModule({
-      providers: [
-        AuthService,
-        JwtService,
-        { provide: UserRepository, useValue: userRepository },
-      ],
+      providers: [AuthService, JwtService, { provide: UserRepository, useValue: userRepository }],
     })
     service = module.get<AuthService>(AuthService)
     jwt = module.get<JwtService>(JwtService)
