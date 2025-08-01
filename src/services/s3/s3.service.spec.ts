@@ -1,33 +1,27 @@
-import { type TestingModule } from '@nestjs/testing'
-import { Test } from '@nestjs/testing'
+import { Test, type TestingModule } from '@nestjs/testing'
 
 import { S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { mockDeep, mockReset } from 'jest-mock-extended'
 
 import { S3Service } from './s3.service'
 
-// Mock AWS SDK
 jest.mock('@aws-sdk/client-s3')
 jest.mock('@aws-sdk/s3-request-presigner')
 
 describe('S3Service', () => {
   let service: S3Service
-  let mockS3Client: jest.Mocked<S3Client>
+  let mockS3Client: any
 
-  const mockSend = jest.fn()
   const mockGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>
 
   beforeEach(async () => {
-    // Mock environment variables
     process.env.AWS_REGION = 'us-east-1'
     process.env.AWS_S3_BUCKET = 'test-bucket'
     process.env.AWS_ACCESS_KEY_ID = 'test-access-key'
     process.env.AWS_SECRET_ACCESS_KEY = 'test-secret-key'
 
-    // Mock S3Client
-    mockS3Client = {
-      send: mockSend,
-    } as any
+    mockS3Client = mockDeep<S3Client>()
     ;(S3Client as jest.MockedClass<typeof S3Client>).mockImplementation(() => mockS3Client)
 
     const module: TestingModule = await Test.createTestingModule({
@@ -36,11 +30,11 @@ describe('S3Service', () => {
 
     service = module.get<S3Service>(S3Service)
 
-    // Reset mocks
     jest.clearAllMocks()
   })
 
   afterEach(() => {
+    mockReset(mockS3Client)
     jest.clearAllMocks()
   })
 
@@ -53,11 +47,11 @@ describe('S3Service', () => {
         contentType: 'text/plain',
       }
 
-      mockSend.mockResolvedValueOnce({})
+      mockS3Client.send.mockResolvedValueOnce({})
 
       const result = await service.uploadFile(options)
 
-      expect(mockSend).toHaveBeenCalled()
+      expect(mockS3Client.send).toHaveBeenCalled()
       expect(result).toBe('https://test-bucket.s3.amazonaws.com/test-file.txt')
     })
 
@@ -68,7 +62,7 @@ describe('S3Service', () => {
         contentType: 'text/plain',
       }
 
-      mockSend.mockRejectedValueOnce(new Error('Upload failed'))
+      mockS3Client.send.mockRejectedValueOnce(new Error('Upload failed'))
 
       await expect(service.uploadFile(options)).rejects.toThrow(
         'Failed to upload file: Upload failed',
@@ -79,16 +73,16 @@ describe('S3Service', () => {
   describe('deleteFile', () => {
     it('should delete file successfully', async () => {
       const key = 'test-file.txt'
-      mockSend.mockResolvedValueOnce({})
+      mockS3Client.send.mockResolvedValueOnce({})
 
       await service.deleteFile(key)
 
-      expect(mockSend).toHaveBeenCalled()
+      expect(mockS3Client.send).toHaveBeenCalled()
     })
 
     it('should throw error on delete failure', async () => {
       const key = 'test-file.txt'
-      mockSend.mockRejectedValueOnce(new Error('Delete failed'))
+      mockS3Client.send.mockRejectedValueOnce(new Error('Delete failed'))
 
       await expect(service.deleteFile(key)).rejects.toThrow('Failed to delete file: Delete failed')
     })
@@ -97,19 +91,19 @@ describe('S3Service', () => {
   describe('fileExists', () => {
     it('should return true when file exists', async () => {
       const key = 'test-file.txt'
-      mockSend.mockResolvedValueOnce({})
+      mockS3Client.send.mockResolvedValueOnce({})
 
       const result = await service.fileExists(key)
 
       expect(result).toBe(true)
-      expect(mockSend).toHaveBeenCalled()
+      expect(mockS3Client.send).toHaveBeenCalled()
     })
 
     it('should return false when file does not exist', async () => {
       const key = 'test-file.txt'
       const error = new Error('Not found')
       error.name = 'NotFound'
-      mockSend.mockRejectedValueOnce(error)
+      mockS3Client.send.mockRejectedValueOnce(error)
 
       const result = await service.fileExists(key)
 
@@ -127,7 +121,7 @@ describe('S3Service', () => {
         Metadata: { custom: 'value' },
       }
 
-      mockSend.mockResolvedValueOnce(mockResponse)
+      mockS3Client.send.mockResolvedValueOnce(mockResponse)
 
       const result = await service.getFileInfo(key)
 
@@ -144,7 +138,7 @@ describe('S3Service', () => {
       const key = 'test-file.txt'
       const error = new Error('Not found')
       error.name = 'NotFound'
-      mockSend.mockRejectedValueOnce(error)
+      mockS3Client.send.mockRejectedValueOnce(error)
 
       const result = await service.getFileInfo(key)
 
@@ -225,11 +219,11 @@ describe('S3Service', () => {
       const sourceKey = 'source/file.txt'
       const destinationKey = 'destination/file.txt'
 
-      mockSend.mockResolvedValueOnce({})
+      mockS3Client.send.mockResolvedValueOnce({})
 
       const result = await service.copyFile(sourceKey, destinationKey)
 
-      expect(mockSend).toHaveBeenCalled()
+      expect(mockS3Client.send).toHaveBeenCalled()
       expect(result).toBe('https://test-bucket.s3.amazonaws.com/destination/file.txt')
     })
   })
