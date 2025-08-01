@@ -42,20 +42,20 @@ export class FileService {
   async uploadAndGetInfo(file: Buffer, originalName: string, userId: string, folderId?: string) {
     // Generate unique key
     const key = this.s3Service.generateKey(originalName, userId, folderId)
-    
+
     // Upload file
     const url = await this.s3Service.uploadFile({
       key,
       file,
       contentType: 'application/pdf',
     })
-    
+
     // Get file size in multiple formats
     const fileSize = await this.s3Service.getFileSize(key)
-    
+
     // Get complete file info
     const fileInfo = await this.s3Service.getFileInfo(key)
-    
+
     return {
       url,
       key,
@@ -116,9 +116,9 @@ export class FileService {
 @Get(':id/size')
 async getFileSize(@Param('id') id: string, @CurrentUser() user: User) {
   const file = await this.fileService.findById(id, user.id)
-  
+
   const fileSize = await this.s3Service.getFileSize(file.s3Key)
-  
+
   return {
     id: file.id,
     name: file.name,
@@ -137,4 +137,4 @@ try {
   // File doesn't exist or other S3 error
   console.error('Error getting file size:', error.message)
 }
-``` 
+```

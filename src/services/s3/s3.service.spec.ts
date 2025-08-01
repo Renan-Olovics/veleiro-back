@@ -248,9 +248,9 @@ describe('S3Service', () => {
 
       expect(result).toEqual({
         bytes: 2048,
-        kilobytes: 2.00,
-        megabytes: 0.00,
-        gigabytes: 0.00,
+        kilobytes: 2.0,
+        megabytes: 0.0,
+        gigabytes: 0.0,
         formatted: '2.00 KB',
       })
     })
@@ -264,9 +264,9 @@ describe('S3Service', () => {
 
       expect(result).toEqual({
         bytes: 0,
-        kilobytes: 0.00,
-        megabytes: 0.00,
-        gigabytes: 0.00,
+        kilobytes: 0.0,
+        megabytes: 0.0,
+        gigabytes: 0.0,
         formatted: '0 B',
       })
     })
@@ -286,9 +286,9 @@ describe('S3Service', () => {
 
       expect(result).toEqual({
         bytes: 1572864,
-        kilobytes: 1536.00,
-        megabytes: 1.50,
-        gigabytes: 0.00,
+        kilobytes: 1536.0,
+        megabytes: 1.5,
+        gigabytes: 0.0,
         formatted: '1.50 MB',
       })
     })
@@ -308,9 +308,9 @@ describe('S3Service', () => {
 
       expect(result).toEqual({
         bytes: 2147483648,
-        kilobytes: 2097152.00,
-        megabytes: 2048.00,
-        gigabytes: 2.00,
+        kilobytes: 2097152.0,
+        megabytes: 2048.0,
+        gigabytes: 2.0,
         formatted: '2.00 GB',
       })
     })
