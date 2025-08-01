@@ -1,8 +1,8 @@
-import { Test, type TestingModule } from '@nestjs/testing'
-
 import { S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { mockDeep, mockReset } from 'jest-mock-extended'
+
+import { createModule } from '../../config/test/module'
 
 import { S3Service } from './s3.service'
 
@@ -24,9 +24,7 @@ describe('S3Service', () => {
     mockS3Client = mockDeep<S3Client>()
     ;(S3Client as jest.MockedClass<typeof S3Client>).mockImplementation(() => mockS3Client)
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [S3Service],
-    }).compile()
+    const module = await createModule({ providers: [S3Service] })
 
     service = module.get<S3Service>(S3Service)
 
