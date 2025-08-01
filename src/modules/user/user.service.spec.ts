@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common'
-import { mockDeep } from 'jest-mock-extended'
+
 import { faker } from '@faker-js/faker'
+import { mockDeep } from 'jest-mock-extended'
 
 import { createModule } from '@/config/test/module'
 import { UserRepository } from '@/repositories'

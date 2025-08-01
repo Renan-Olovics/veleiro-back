@@ -1,4 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { type TestingModule } from '@nestjs/testing'
+import { Test } from '@nestjs/testing'
+
 import { S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 

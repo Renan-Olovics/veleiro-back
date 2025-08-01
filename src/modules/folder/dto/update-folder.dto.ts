@@ -1,5 +1,6 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
+
+import { IsOptional, IsString, IsUUID } from 'class-validator'
 
 export class UpdateFolderDto {
   @ApiProperty({ example: 'Updated Documents', required: false })

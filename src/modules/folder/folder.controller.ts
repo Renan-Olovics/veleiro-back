@@ -8,9 +8,9 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 
-import { JwtAuthGuard } from '@/modules/auth/guard'
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator'
-import type { CurrentUser as CurrentUserType } from '@/modules/auth/types'
+import { JwtAuthGuard } from '@/modules/auth/guard'
+import { type CurrentUser as CurrentUserType } from '@/modules/auth/types'
 
 import { CreateFolderDto, UpdateFolderDto } from './dto'
 import { FolderService } from './folder.service'

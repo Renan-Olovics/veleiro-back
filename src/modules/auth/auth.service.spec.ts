@@ -1,7 +1,8 @@
-import { mock, type MockProxy } from 'jest-mock-extended'
 import { JwtService } from '@nestjs/jwt'
+
 import { faker } from '@faker-js/faker'
 import * as bcrypt from 'bcryptjs'
+import { mock, type MockProxy } from 'jest-mock-extended'
 
 import { createModule } from '@/config/test/module'
 import { UserRepository } from '@/repositories'

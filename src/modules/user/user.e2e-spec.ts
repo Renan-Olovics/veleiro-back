@@ -1,10 +1,11 @@
-import type { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import { ValidationPipe } from '@nestjs/common'
+
 import { faker } from '@faker-js/faker'
 import * as request from 'supertest'
 
-import { createModule } from '@/config/test/module'
 import { AppModule } from '@/app.module'
+import { createModule } from '@/config/test/module'
 
 describe('UserModule (e2e)', () => {
   let app: INestApplication

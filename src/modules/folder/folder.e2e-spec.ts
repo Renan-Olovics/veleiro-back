@@ -1,5 +1,6 @@
-import type { INestApplication } from '@nestjs/common'
+import { type INestApplication } from '@nestjs/common'
 import { ValidationPipe } from '@nestjs/common'
+
 import { faker } from '@faker-js/faker'
 import * as request from 'supertest'
 

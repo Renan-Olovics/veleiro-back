@@ -1,5 +1,6 @@
 // @ts-check
 import eslint from '@eslint/js'
+import importPlugin from 'eslint-plugin-import'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -11,6 +12,11 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   eslintPluginPrettierRecommended,
+  {
+    plugins: {
+      import: importPlugin,
+    },
+  },
   {
     languageOptions: {
       globals: {
@@ -38,7 +44,7 @@ export default tseslint.config(
       semi: ['error', 'never'],
       '@typescript-eslint/consistent-type-imports': [
         'error',
-        { prefer: 'type-imports' },
+        { prefer: 'type-imports', disallowTypeAnnotations: false },
       ],
       // Import organization rules
       'import/order': [
@@ -88,6 +94,7 @@ export default tseslint.config(
       'import/no-unresolved': 'off',
       'import/prefer-default-export': 'off',
       'import/no-default-export': 'warn',
+      'import/consistent-type-specifier-style': ['error', 'prefer-inline'],
     },
   },
   {

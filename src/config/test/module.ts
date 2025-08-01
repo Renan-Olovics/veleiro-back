@@ -1,8 +1,9 @@
-import type { ModuleMetadata, Provider } from '@nestjs/common'
+import { type ModuleMetadata, type Provider } from '@nestjs/common'
 import { Test, type TestingModule } from '@nestjs/testing'
+
 import { mockDeep } from 'jest-mock-extended'
 
-import { PrismaService } from '@/services/prisma.service'
+import { PrismaService } from '@/services'
 
 type createModule = {
   providers?: Provider[]

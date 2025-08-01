@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
+
 import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand,
   CopyObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
-import { S3Config, UploadFileOptions, FileInfo, FileSize } from './types'
+import { type FileInfo, type FileSize, type S3Config, type UploadFileOptions } from './types'
 
 @Injectable()
 export class S3Service {

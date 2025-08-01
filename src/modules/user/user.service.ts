@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common'
+
 import { User } from '@prisma/client'
 import { hash } from 'bcryptjs'
 

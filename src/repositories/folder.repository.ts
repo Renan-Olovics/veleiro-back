@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import type { Folder } from '@prisma/client'
+
+import { type Folder } from '@prisma/client'
 
 import { CreateFolderData } from '@/modules/folder/types'
 import { PrismaService } from '@/services'
