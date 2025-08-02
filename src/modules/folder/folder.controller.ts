@@ -157,6 +157,5 @@ export class FolderController {
   })
   async delete(@Param('id') id: string, @CurrentUser() { id: userId }: CurrentUserType) {
     await this.folderService.delete(id, userId)
-    return { message: 'Folder deleted successfully' }
   }
 }

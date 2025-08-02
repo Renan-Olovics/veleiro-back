@@ -1,8 +1,8 @@
 import {
-  Injectable,
   BadRequestException,
-  NotFoundException,
   ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common'
 
 import { Folder } from '@prisma/client'
@@ -15,8 +15,9 @@ import { CreateFolderData, UpdateFolderData } from './types'
 export class FolderService {
   constructor(private readonly folderRepository: FolderRepository) {}
 
-  async create(data: CreateFolderData): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>> {
-    // Validate parent folder if provided
+  async create(
+    data: CreateFolderData,
+  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>> {
     if (data.parentId) {
       const parentFolder = await this.folderRepository.findById(data.parentId)
       if (!parentFolder) {
@@ -27,11 +28,12 @@ export class FolderService {
       }
     }
 
-    const { createdAt, updatedAt, ...folder } = await this.folderRepository.create(data)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, updatedAt, userId, ...folder } = await this.folderRepository.create(data)
     return folder
   }
 
-  async findAll(userId: string): Promise<Folder[]> {
+  async findAll(userId: string): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>[]> {
     return this.folderRepository.findByUserId(userId)
   }
 
@@ -39,7 +41,7 @@ export class FolderService {
     return this.folderRepository.findRootFoldersByUserId(userId)
   }
 
-  async findById(id: string, userId: string): Promise<Folder> {
+  async findById(id: string, userId: string) {
     const folder = await this.folderRepository.findByIdWithChildren(id)
     if (!folder) {
       throw new NotFoundException('Folder not found')
@@ -47,14 +49,16 @@ export class FolderService {
     if (folder.userId !== userId) {
       throw new ForbiddenException('Folder does not belong to user')
     }
-    return folder
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, updatedAt, userId: _, ...data } = folder
+    return data
   }
 
   async update(
     id: string,
     data: UpdateFolderData,
     userId: string,
-  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>> {
+  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>> {
     const folder = await this.folderRepository.findById(id)
     if (!folder) {
       throw new NotFoundException('Folder not found')
@@ -81,7 +85,16 @@ export class FolderService {
       }
     }
 
-    const { createdAt, updatedAt, ...updatedFolder } = await this.folderRepository.update(id, data)
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      createdAt,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      updatedAt,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      userId: _,
+      ...updatedFolder
+    } = await this.folderRepository.update(id, data)
+
     return updatedFolder
   }
 
@@ -102,19 +115,19 @@ export class FolderService {
     folderId: string,
     newParentId: string,
   ): Promise<boolean> {
-    let currentParentId = newParentId
+    let currentId = newParentId
 
-    while (currentParentId) {
-      if (currentParentId === folderId) {
+    while (currentId) {
+      if (currentId === folderId) {
         return true
       }
 
-      const parent = await this.folderRepository.findById(currentParentId)
-      if (!parent) {
+      const parent = await this.folderRepository.findById(currentId)
+      if (!parent?.parentId) {
         break
       }
 
-      currentParentId = parent.parentId || ''
+      currentId = parent.parentId
     }
 
     return false

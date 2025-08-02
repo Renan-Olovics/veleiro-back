@@ -6,21 +6,27 @@ import { mock, type MockProxy } from 'jest-mock-extended'
 
 import { createModule } from '@/config/test/module'
 import { UserRepository } from '@/repositories'
+import { JwtSharedService } from '@/services/jwt'
 
 import { AuthService } from './auth.service'
 
 describe('AuthService', () => {
   let service: AuthService
-  let jwt: JwtService
+  let jwtSharedService: JwtSharedService
   let userRepository: MockProxy<UserRepository>
 
   beforeEach(async () => {
     userRepository = mock<UserRepository>()
     const module = await createModule({
-      providers: [AuthService, JwtService, { provide: UserRepository, useValue: userRepository }],
+      providers: [
+        AuthService,
+        JwtSharedService,
+        JwtService,
+        { provide: UserRepository, useValue: userRepository },
+      ],
     })
     service = module.get<AuthService>(AuthService)
-    jwt = module.get<JwtService>(JwtService)
+    jwtSharedService = module.get<JwtSharedService>(JwtSharedService)
   })
 
   it('should throw if user not found', async () => {
@@ -60,7 +66,7 @@ describe('AuthService', () => {
       updatedAt: new Date(),
     })
     jest.spyOn(bcrypt, 'compare').mockImplementation(() => true)
-    jest.spyOn(jwt, 'sign').mockReturnValue('token')
+    jest.spyOn(jwtSharedService, 'generateToken').mockReturnValue('token')
     const result = await service.login({ email, password })
     expect(result).toEqual({ access_token: 'token' })
   })

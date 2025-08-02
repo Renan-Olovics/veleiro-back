@@ -1,19 +1,20 @@
-import { Injectable, BadRequestException } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 
-import { User } from '@prisma/client'
 import { hash } from 'bcryptjs'
 
 import { UserRepository } from '@/repositories'
+import { JwtSharedService } from '@/services/jwt'
 
-import { RegisterUserData } from './types'
+import { CreateUserResponse, RegisterUserData } from './types'
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly jwtSharedService: JwtSharedService,
+  ) {}
 
-  async create(
-    data: RegisterUserData,
-  ): Promise<Omit<User, 'password' | 'createdAt' | 'updatedAt'>> {
+  async create(data: RegisterUserData): Promise<CreateUserResponse> {
     if (await this.isEmailInUse(data.email)) {
       throw new BadRequestException('Email already in use')
     }
@@ -24,7 +25,10 @@ export class UserService {
       ...data,
       password: hashedPassword,
     })
-    return user
+
+    const token = this.jwtSharedService.generateToken(user)
+
+    return { ...user, access_token: token }
   }
 
   async isEmailInUse(email: string): Promise<boolean> {
