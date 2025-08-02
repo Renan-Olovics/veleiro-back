@@ -26,10 +26,6 @@ export class S3Service {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
     }
 
-    if (!config.bucket || !config.accessKeyId || !config.secretAccessKey) {
-      this.logger.warn('AWS S3 configuration incomplete. S3 operations will fail.')
-    }
-
     this.bucket = config.bucket
     this.s3Client = new S3Client({
       region: config.region,
@@ -51,11 +47,9 @@ export class S3Service {
       })
 
       await this.s3Client.send(command)
-      this.logger.log(`File uploaded successfully: ${options.key}`)
 
       return this.getFileUrl(options.key)
     } catch (error) {
-      this.logger.error(`Failed to upload file ${options.key}:`, error)
       throw new Error(`Failed to upload file: ${error.message}`)
     }
   }
@@ -68,9 +62,7 @@ export class S3Service {
       })
 
       await this.s3Client.send(command)
-      this.logger.log(`File deleted successfully: ${key}`)
     } catch (error) {
-      this.logger.error(`Failed to delete file ${key}:`, error)
       throw new Error(`Failed to delete file: ${error.message}`)
     }
   }
@@ -125,11 +117,9 @@ export class S3Service {
       })
 
       const url = await getSignedUrl(this.s3Client, command, { expiresIn })
-      this.logger.log(`Upload URL generated for: ${key}`)
 
       return url
     } catch (error) {
-      this.logger.error(`Failed to generate upload URL for ${key}:`, error)
       throw new Error(`Failed to generate upload URL: ${error.message}`)
     }
   }
@@ -142,11 +132,9 @@ export class S3Service {
       })
 
       const url = await getSignedUrl(this.s3Client, command, { expiresIn })
-      this.logger.log(`Download URL generated for: ${key}`)
 
       return url
     } catch (error) {
-      this.logger.error(`Failed to generate download URL for ${key}:`, error)
       throw new Error(`Failed to generate download URL: ${error.message}`)
     }
   }
@@ -181,11 +169,9 @@ export class S3Service {
       })
 
       await this.s3Client.send(command)
-      this.logger.log(`File copied from ${sourceKey} to ${destinationKey}`)
 
       return this.getFileUrl(destinationKey)
     } catch (error) {
-      this.logger.error(`Failed to copy file from ${sourceKey} to ${destinationKey}:`, error)
       throw new Error(`Failed to copy file: ${error.message}`)
     }
   }

@@ -14,6 +14,7 @@ const config = {
     '^@/(.*)$': '<rootDir>/$1',
   },
   moduleDirectories: ['node_modules', 'src'],
+  globalSetup: '<rootDir>/config/test/setup.ts',
 }
 
 module.exports = config
