@@ -22,7 +22,7 @@ import { FileService } from './file.service'
 @ApiTags('files')
 @Controller('files')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 

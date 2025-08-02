@@ -1,11 +1,11 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiParam,
   ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger'
 
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator'
@@ -16,7 +16,7 @@ import { CreateFolderDto, UpdateFolderDto } from './dto'
 import { FolderService } from './folder.service'
 
 @ApiTags('folder')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @Controller('folder')
 @UseGuards(JwtAuthGuard)
 export class FolderController {
