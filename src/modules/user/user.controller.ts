@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Query, Get } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger'
+import { Body, Controller, Get, Post, Query } from '@nestjs/common'
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { RegisterUserDto } from './dto'
 import { UserService } from './user.service'
@@ -41,7 +41,7 @@ export class UserController {
     type: String,
     required: true,
     description: 'Email to check if it is already in use',
-    example: 'john@example.com',
+    example: 'user@example.com',
   })
   @ApiResponse({ status: 200, description: 'Email check result.' })
   @ApiResponse({

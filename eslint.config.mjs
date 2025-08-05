@@ -95,6 +95,10 @@ export default tseslint.config(
       'import/prefer-default-export': 'off',
       'import/no-default-export': 'warn',
       'import/consistent-type-specifier-style': ['error', 'prefer-inline'],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_+$', varsIgnorePattern: '^_+$' },
+      ],
     },
   },
   {

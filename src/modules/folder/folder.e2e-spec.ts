@@ -1,5 +1,4 @@
-import { type INestApplication } from '@nestjs/common'
-import { ValidationPipe } from '@nestjs/common'
+import { ValidationPipe, type INestApplication } from '@nestjs/common'
 
 import { faker } from '@faker-js/faker'
 import * as request from 'supertest'
@@ -11,6 +10,7 @@ describe('FolderModule (e2e)', () => {
   let app: INestApplication
   let authToken: string
   let userId: string
+  let httpRequest: ReturnType<typeof request>
 
   beforeAll(async () => {
     const module = await createModule({ imports: [AppModule] })
@@ -19,22 +19,23 @@ describe('FolderModule (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe())
     await app.init()
 
-    const userEmail = faker.internet.email()
-    const userPassword = faker.internet.password()
-    const userName = faker.person.fullName()
+    httpRequest = request(app.getHttpServer())
 
-    const userRes = await request(app.getHttpServer())
+    const email = faker.internet.email()
+    const password = faker.internet.password()
+
+    const userRes = await httpRequest
       .post('/user/create')
-      .send({ name: userName, email: userEmail, password: userPassword })
+      .send({
+        name: faker.person.fullName(),
+        email,
+        password,
+      })
       .expect(201)
 
     userId = userRes.body.id
 
-    // Login to get auth token
-    const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: userEmail, password: userPassword })
-      .expect(201)
+    const loginRes = await httpRequest.post('/auth/login').send({ email, password }).expect(201)
 
     authToken = loginRes.body.access_token
   })
@@ -46,12 +47,12 @@ describe('FolderModule (e2e)', () => {
   describe('/folder/create (POST)', () => {
     it('should create folder without parent', async () => {
       const folderData = {
-        name: 'Test Folder',
-        description: 'Test description',
-        color: '#3B82F6',
+        name: faker.lorem.word(),
+        description: faker.lorem.sentence(),
+        color: faker.color.rgb(),
       }
 
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send(folderData)
@@ -66,18 +67,18 @@ describe('FolderModule (e2e)', () => {
     })
 
     it('should create folder with parent', async () => {
-      const parentFolder = await request(app.getHttpServer())
+      const parentFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Parent Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
       const childFolderData = {
-        name: 'Child Folder',
+        name: faker.lorem.word(),
         parentId: parentFolder.body.id,
       }
 
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send(childFolderData)
@@ -90,11 +91,11 @@ describe('FolderModule (e2e)', () => {
 
     it('should not create folder with invalid parent', async () => {
       const folderData = {
-        name: 'Test Folder',
+        name: faker.lorem.word(),
         parentId: faker.string.uuid(),
       }
 
-      await request(app.getHttpServer())
+      await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send(folderData)
@@ -103,18 +104,18 @@ describe('FolderModule (e2e)', () => {
 
     it('should not create folder without authentication', async () => {
       const folderData = {
-        name: 'Test Folder',
+        name: faker.lorem.word(),
       }
 
-      await request(app.getHttpServer()).post('/folder/create').send(folderData).expect(401)
+      await httpRequest.post('/folder/create').send(folderData).expect(401)
     })
 
     it('should not create folder without name', async () => {
       const folderData = {
-        description: 'Test description',
+        description: faker.lorem.sentence(),
       }
 
-      await request(app.getHttpServer())
+      await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send(folderData)
@@ -124,7 +125,7 @@ describe('FolderModule (e2e)', () => {
 
   describe('/folder/all (GET)', () => {
     it('should return all folders for user', async () => {
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .get('/folder/all')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
@@ -134,13 +135,13 @@ describe('FolderModule (e2e)', () => {
     })
 
     it('should not return folders without authentication', async () => {
-      await request(app.getHttpServer()).get('/folder/all').expect(401)
+      await httpRequest.get('/folder/all').expect(401)
     })
   })
 
   describe('/folder/root (GET)', () => {
     it('should return only root folders for user', async () => {
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .get('/folder/root')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
@@ -154,56 +155,56 @@ describe('FolderModule (e2e)', () => {
 
   describe('/folder/:id (GET)', () => {
     it('should return folder by ID with children and files', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Test Folder for Get' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .get(`/folder/${folder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
 
       expect(res.body).toHaveProperty('id', folder.body.id)
-      expect(res.body).toHaveProperty('name', 'Test Folder for Get')
+      expect(res.body).toHaveProperty('name', folder.body.name)
       expect(res.body).toHaveProperty('children')
       expect(res.body).toHaveProperty('files')
     })
 
     it('should not return folder with invalid ID', async () => {
-      await request(app.getHttpServer())
+      await httpRequest
         .get(`/folder/${faker.string.uuid()}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
     })
 
     it('should not return folder without authentication', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send({ name: 'Test Folder' })
         .expect(201)
 
-      await request(app.getHttpServer()).get(`/folder/${folder.body.id}`).expect(401)
+      await httpRequest.get(`/folder/${folder.body.id}`).expect(401)
     })
   })
 
   describe('/folder/:id (PUT)', () => {
     it('should update folder successfully', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Original Name' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
       const updateData = {
-        name: 'Updated Name',
-        description: 'Updated description',
-        color: '#EF4444',
+        name: faker.lorem.word(),
+        description: faker.lorem.sentence(),
+        color: faker.color.rgb(),
       }
 
-      const res = await request(app.getHttpServer())
+      const res = await httpRequest
         .put(`/folder/${folder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateData)
@@ -215,9 +216,9 @@ describe('FolderModule (e2e)', () => {
     })
 
     it('should not update folder with invalid ID', async () => {
-      const updateData = { name: 'Updated Name' }
+      const updateData = { name: faker.lorem.word() }
 
-      await request(app.getHttpServer())
+      await httpRequest
         .put(`/folder/${faker.string.uuid()}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateData)
@@ -225,30 +226,27 @@ describe('FolderModule (e2e)', () => {
     })
 
     it('should not update folder without authentication', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Test Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      const updateData = { name: 'Updated Name' }
+      const updateData = { name: faker.lorem.word() }
 
-      await request(app.getHttpServer())
-        .put(`/folder/${folder.body.id}`)
-        .send(updateData)
-        .expect(401)
+      await httpRequest.put(`/folder/${folder.body.id}`).send(updateData).expect(401)
     })
 
     it('should not allow folder to be its own parent', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Test Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
       const updateData = { parentId: folder.body.id }
 
-      await request(app.getHttpServer())
+      await httpRequest
         .put(`/folder/${folder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send(updateData)
@@ -258,69 +256,67 @@ describe('FolderModule (e2e)', () => {
 
   describe('/folder/:id (DELETE)', () => {
     it('should delete folder successfully', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Folder to Delete' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      const res = await request(app.getHttpServer())
+      await httpRequest
         .delete(`/folder/${folder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
 
-      expect(res.body).toHaveProperty('message', 'Folder deleted successfully')
-
-      await request(app.getHttpServer())
+      await httpRequest
         .get(`/folder/${folder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
     })
 
     it('should not delete folder with invalid ID', async () => {
-      await request(app.getHttpServer())
+      await httpRequest
         .delete(`/folder/${faker.string.uuid()}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
     })
 
     it('should not delete folder without authentication', async () => {
-      const folder = await request(app.getHttpServer())
+      const folder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Test Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      await request(app.getHttpServer()).delete(`/folder/${folder.body.id}`).expect(401)
+      await httpRequest.delete(`/folder/${folder.body.id}`).expect(401)
     })
 
     it('should delete folder and all its children recursively', async () => {
-      const parentFolder = await request(app.getHttpServer())
+      const parentFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Parent Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      const childFolder = await request(app.getHttpServer())
+      const childFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Child Folder',
+          name: faker.lorem.word(),
           parentId: parentFolder.body.id,
         })
         .expect(201)
 
-      await request(app.getHttpServer())
+      await httpRequest
         .delete(`/folder/${parentFolder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
 
-      await request(app.getHttpServer())
+      await httpRequest
         .get(`/folder/${parentFolder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
 
-      await request(app.getHttpServer())
+      await httpRequest
         .get(`/folder/${childFolder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
@@ -329,31 +325,31 @@ describe('FolderModule (e2e)', () => {
 
   describe('Folder hierarchy', () => {
     it('should handle complex folder structure', async () => {
-      const rootFolder = await request(app.getHttpServer())
+      const rootFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Root Folder' })
+        .send({ name: faker.lorem.word() })
         .expect(201)
 
-      const subFolder = await request(app.getHttpServer())
+      const subFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Sub Folder',
+          name: faker.lorem.word(),
           parentId: rootFolder.body.id,
         })
         .expect(201)
 
-      const subSubFolder = await request(app.getHttpServer())
+      const subSubFolder = await httpRequest
         .post('/folder/create')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          name: 'Sub Sub Folder',
+          name: faker.lorem.word(),
           parentId: subFolder.body.id,
         })
         .expect(201)
 
-      const rootWithChildren = await request(app.getHttpServer())
+      const rootWithChildren = await httpRequest
         .get(`/folder/${rootFolder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
@@ -361,7 +357,7 @@ describe('FolderModule (e2e)', () => {
       expect(rootWithChildren.body.children).toHaveLength(1)
       expect(rootWithChildren.body.children[0].id).toBe(subFolder.body.id)
 
-      const subWithChildren = await request(app.getHttpServer())
+      const subWithChildren = await httpRequest
         .get(`/folder/${subFolder.body.id}`)
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200)

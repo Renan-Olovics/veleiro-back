@@ -4,7 +4,7 @@ import { join } from 'path'
 import { Client } from 'pg'
 
 async function resetDatabase() {
-  const replaced = process.env.DATABASE_URL?.replace('veleiro', 'postgres')
+  const replaced = 'postgres://user:password@localhost:5432/postgres'
   const client = new Client({
     connectionString: replaced,
   })
@@ -25,7 +25,7 @@ async function resetDatabase() {
 }
 
 async function runMigrations() {
-  const replaced = process.env.DATABASE_URL?.replace('veleiro', 'veleiro_test')
+  const replaced = 'postgres://user:password@localhost:5432/veleiro_test'
   const client = new Client({
     connectionString: replaced,
   })

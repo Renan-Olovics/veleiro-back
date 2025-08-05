@@ -1,0 +1,561 @@
+{
+  "info": {
+    "name": "Veleiro API",
+    "description": "Coleção completa da API Veleiro - Sistema de gerenciamento de arquivos e pastas",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "fileId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "folderId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Autenticar usuário e retornar token JWT",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Salvar o bearer token automaticamente",
+                    "if (pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    if (response.access_token) {",
+                    "        pm.collectionVariables.set('authToken', response.access_token);",
+                    "        console.log('Token salvo automaticamente:', response.access_token);",
+                    "    }",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "create"
+              ]
+            },
+            "description": "Criar um novo usuário no sistema",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Salvar o bearer token automaticamente (se retornado)",
+                    "if (pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    if (response.access_token) {",
+                    "        pm.collectionVariables.set('authToken', response.access_token);",
+                    "        console.log('Token salvo automaticamente do create user:', response.access_token);",
+                    "    }",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Check Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/check-email?email=user@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "check-email"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com",
+                  "description": "Email para verificar se já está em uso"
+                }
+              ]
+            },
+            "description": "Verificar se um email já está registrado no sistema"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Folder",
+      "item": [
+        {
+          "name": "Create Folder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Minha Pasta\",\n  \"description\": \"Pasta para documentos pessoais\",\n  \"color\": \"#3B82F6\",\n  \"parentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/folder/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "create"
+              ]
+            },
+            "description": "Criar uma nova pasta no sistema",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Salvar o folder ID automaticamente",
+                    "if (pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    if (response.id) {",
+                    "        pm.collectionVariables.set('folderId', response.id);",
+                    "        console.log('Folder ID salvo automaticamente:', response.id);",
+                    "    }",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Folders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folder/all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "all"
+              ]
+            },
+            "description": "Obter todas as pastas do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Root Folders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folder/root",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "root"
+              ]
+            },
+            "description": "Obter apenas as pastas raiz (sem pasta pai) do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Folder by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folder/{{folderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "{{folderId}}"
+              ]
+            },
+            "description": "Obter uma pasta específica com seus filhos e arquivos"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Folder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Pasta Atualizada\",\n  \"description\": \"Descrição atualizada da pasta\",\n  \"color\": \"#EF4444\",\n  \"parentId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/folder/{{folderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "{{folderId}}"
+              ]
+            },
+            "description": "Atualizar uma pasta existente"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Folder",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/folder/{{folderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "folder",
+                "{{folderId}}"
+              ]
+            },
+            "description": "Excluir uma pasta e todos os seus filhos recursivamente"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folderId",
+                  "value": "",
+                  "type": "text",
+                  "description": "ID da pasta onde o arquivo será salvo (opcional)"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text",
+                  "description": "Descrição do arquivo (opcional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "upload"
+              ]
+            },
+            "description": "Fazer upload de um arquivo",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "// Salvar o file ID automaticamente",
+                    "if (pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    if (response.id) {",
+                    "        pm.collectionVariables.set('fileId', response.id);",
+                    "        console.log('File ID salvo automaticamente:', response.id);",
+                    "    }",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files"
+              ]
+            },
+            "description": "Obter todos os arquivos do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Root Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/root",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "root"
+              ]
+            },
+            "description": "Obter arquivos raiz (não estão em nenhuma pasta) do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Files by Folder",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/folder/{{folderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "folder",
+                "{{folderId}}"
+              ]
+            },
+            "description": "Obter arquivos em uma pasta específica"
+          },
+          "response": []
+        },
+        {
+          "name": "Get File by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": "Obter um arquivo específico por ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Download URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}/download-url",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "{{fileId}}",
+                "download-url"
+              ]
+            },
+            "description": "Gerar URL de download para um arquivo"
+          },
+          "response": []
+        },
+        {
+          "name": "Update File",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"arquivo_atualizado.pdf\",\n  \"description\": \"Descrição atualizada do arquivo\",\n  \"folderId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": "Atualizar um arquivo"
+          },
+          "response": []
+        },
+        {
+          "name": "Move File to Folder",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"folderId\": \"{{folderId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}/move",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "{{fileId}}",
+                "move"
+              ]
+            },
+            "description": "Mover um arquivo para uma pasta diferente"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/files/{{fileId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": "Excluir um arquivo"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -15,9 +15,7 @@ import { CreateFolderData, UpdateFolderData } from './types'
 export class FolderService {
   constructor(private readonly folderRepository: FolderRepository) {}
 
-  async create(
-    data: CreateFolderData,
-  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>> {
+  async create(data: CreateFolderData): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>> {
     if (data.parentId) {
       const parentFolder = await this.folderRepository.findById(data.parentId)
       if (!parentFolder) {
@@ -28,12 +26,11 @@ export class FolderService {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { createdAt, updatedAt, userId, ...folder } = await this.folderRepository.create(data)
+    const { createdAt: _, updatedAt: __, ...folder } = await this.folderRepository.create(data)
     return folder
   }
 
-  async findAll(userId: string): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>[]> {
+  async findAll(userId: string): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>[]> {
     return this.folderRepository.findByUserId(userId)
   }
 
@@ -49,8 +46,8 @@ export class FolderService {
     if (folder.userId !== userId) {
       throw new ForbiddenException('Folder does not belong to user')
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { createdAt, updatedAt, userId: _, ...data } = folder
+
+    const { createdAt: _, updatedAt: __, ...data } = folder
     return data
   }
 
@@ -58,7 +55,7 @@ export class FolderService {
     id: string,
     data: UpdateFolderData,
     userId: string,
-  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>> {
+  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>> {
     const folder = await this.folderRepository.findById(id)
     if (!folder) {
       throw new NotFoundException('Folder not found')
@@ -86,20 +83,15 @@ export class FolderService {
     }
 
     const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      createdAt,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      updatedAt,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      userId: _,
+      createdAt: _,
+      updatedAt: __,
       ...updatedFolder
     } = await this.folderRepository.update(id, data)
 
     return updatedFolder
   }
 
-  async delete(id: string, userId: string): Promise<void> {
-    // Check if folder exists and belongs to user
+  async delete(id: string, userId: string): Promise<{ message: string }> {
     const folder = await this.folderRepository.findById(id)
     if (!folder) {
       throw new NotFoundException('Folder not found')
@@ -109,6 +101,7 @@ export class FolderService {
     }
 
     await this.folderRepository.delete(id)
+    return { message: 'Folder deleted successfully' }
   }
 
   private async wouldCreateCircularReference(

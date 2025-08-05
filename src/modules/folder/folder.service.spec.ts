@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common'
 
 import { faker } from '@faker-js/faker'
 import { mockDeep } from 'jest-mock-extended'
@@ -133,10 +133,11 @@ describe('FolderService', () => {
       const folder = makeFolder()
       folderRepository.findByIdWithChildren.mockResolvedValue(folder)
 
-      const result = await service.findById(folderId, userId)
+      const { userId: _, ...result } = await service.findById(folderId, userId)
 
       expect(folderRepository.findByIdWithChildren).toHaveBeenCalledWith(folderId)
-      expect(result).toEqual(folder)
+      const { createdAt: __, updatedAt: ___, userId: ____, ...expectedResult } = folder
+      expect(result).toEqual(expectedResult)
     })
 
     it('should throw if folder not found', async () => {
@@ -208,6 +209,58 @@ describe('FolderService', () => {
       await expect(service.update(folderId, updateData, userId)).rejects.toThrow(
         BadRequestException,
       )
+    })
+
+    it('should throw if parent folder does not belong to user', async () => {
+      const folder = makeFolder()
+      const parentFolder = makeFolder({
+        id: faker.string.uuid(),
+        userId: faker.string.uuid(),
+      })
+      const updateData = { parentId: parentFolder.id }
+
+      folderRepository.findById
+        .mockResolvedValueOnce(folder) // First call for the folder being updated
+        .mockResolvedValueOnce(parentFolder) // Second call for the parent folder
+
+      await expect(service.update(folderId, updateData, userId)).rejects.toThrow(ForbiddenException)
+    })
+
+    it('should throw if trying to create circular reference', async () => {
+      const folder = makeFolder()
+      const childId = faker.string.uuid()
+      const grandchildId = faker.string.uuid()
+      const updateData = { parentId: childId }
+
+      // Mock the folder being updated
+      folderRepository.findById
+        .mockResolvedValueOnce(folder) // First call for the folder being updated
+        .mockResolvedValueOnce(makeFolder({ id: childId, parentId: grandchildId })) // Second call for the new parent
+        .mockResolvedValueOnce(makeFolder({ id: grandchildId, parentId: folderId })) // Third call for the grandparent (creates circular reference)
+
+      await expect(service.update(folderId, updateData, userId)).rejects.toThrow(
+        BadRequestException,
+      )
+    })
+
+    it('should allow setting parent to a valid folder without circular reference', async () => {
+      const folder = makeFolder()
+      const newParentId = faker.string.uuid()
+      const updateData = { parentId: newParentId }
+      const updatedFolder = { ...folder, ...updateData }
+
+      // Mock the folder being updated
+      folderRepository.findById
+        .mockResolvedValueOnce(folder) // First call for the folder being updated
+        .mockResolvedValueOnce(makeFolder({ id: newParentId, parentId: null })) // Second call for the new parent (no circular reference)
+
+      folderRepository.update.mockResolvedValue(updatedFolder)
+
+      const result = await service.update(folderId, updateData, userId)
+
+      expect(folderRepository.findById).toHaveBeenCalledWith(folderId)
+      expect(folderRepository.update).toHaveBeenCalledWith(folderId, updateData)
+      expect(result).toHaveProperty('parentId', newParentId)
     })
   })
 

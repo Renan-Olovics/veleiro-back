@@ -20,10 +20,7 @@ export class FolderRepository {
     })
   }
 
-  async findByUserId(
-    userId: string,
-  ): Promise<Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>[]> {
-    // nao retorna o createdAt e updatedAt
+  async findByUserId(userId: string): Promise<Omit<Folder, 'createdAt' | 'updatedAt'>[]> {
     return await this.prisma.folder.findMany({
       where: { userId },
       select: {
@@ -32,6 +29,7 @@ export class FolderRepository {
         parentId: true,
         description: true,
         color: true,
+        userId: true,
         files: true,
         children: {
           select: {
